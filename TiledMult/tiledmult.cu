@@ -1,9 +1,10 @@
-// MP 3: Due Sunday, Dec 30, 2012 at 11:59 p.m. PST
-// Compute C = A * B
+#include <stdio.h>
+#include <cuda.h>
+#include <stdlib.h>
+
 #define TILE_WIDTH 2
-#define TILES 2.0
       
-__global__ void matrixMultiplyShared(__shared__ float * A, __shared__ float * B, __shared__ float * C,
+__global__ void matrixMultiplyShared(float * A, float * B, float * C,
 			             int numARows, int numAColumns,
 			             int numBRows, int numBColumns,
 			             int numCRows, int numCColumns) {
@@ -40,36 +41,47 @@ int main(int argc, char ** argv) {
     float * deviceA;
     float * deviceB;
     float * deviceC;
-    int numARows; // number of rows in the matrix A
-    int numAColumns; // number of columns in the matrix A
-    int numBRows; // number of rows in the matrix B
-    int numBColumns; // number of columns in the matrix B
-    int numCRows; // number of rows in the matrix C (you have to set this)
-    int numCColumns; // number of columns in the matrix C (you have to set this)
+    int numARows = 4; // number of rows in the matrix A
+    int numAColumns = 4; // number of columns in the matrix A
+    int numBRows = 4; // number of rows in the matrix B
+    int numBColumns =4; // number of columns in the matrix B
+    int numCRows; // number of rows in the matrix C
+    int numCColumns; // number of columns in the matrix C
 
 
-    //@@ Set numCRows and numCColumns
     numCRows = numARows;
     numCColumns = numBColumns;
-    //@@ Allocate the hostC matrix
+
     int sizeA = numARows * numAColumns * sizeof(float);
     int sizeB = numBRows * numBColumns * sizeof(float);
     int sizeC = numCRows * numCColumns * sizeof(float);
+
+    hostA = (float *) malloc(sizeA);
+    hostB = (float *) malloc(sizeB);
+
+    for(int i = 0; i < (numARows * numAColumns); i++) {
+        hostA[i] = i;
+    }
+
+    for(int i = 0; i < (numBRows * numBColumns); i++) {
+        hostB[i] = i;
+    }
+
     hostC = (float *) malloc(sizeC);  
   
-    //@@ Allocate GPU memory here
+    // Allocate GPU memory here
 
     cudaMalloc((void **) &deviceA, sizeA);
     cudaMalloc((void **) &deviceB, sizeB);
     cudaMalloc((void **) &deviceC, sizeC);
   
-    //@@ Copy memory to the GPU here
+    // Copy memory to the GPU here
 
     cudaMemcpy(deviceA, hostA, sizeA, cudaMemcpyHostToDevice);
     cudaMemcpy(deviceB, hostB, sizeB, cudaMemcpyHostToDevice);
     
-    //@@ Initialize the grid and block dimensions here
-  	dim3 dimGrid(ceil(((float)numCColumns)/TILES), ceil(((float) numCRows)/TILES), 1);
+    // Initialize the grid and block dimensions here
+  	dim3 dimGrid(ceil(((float)numCColumns)/TILE_WIDTH), ceil(((float) numCRows)/TILE_WIDTH), 1);
   	dim3 dimBlock(TILE_WIDTH, TILE_WIDTH, 1);
   
     //@@ Launch the GPU Kernel here
@@ -81,6 +93,9 @@ int main(int argc, char ** argv) {
 
     cudaMemcpy(hostC, deviceC, sizeC, cudaMemcpyDeviceToHost);
   
+    for(int i = 0; i < (numCRows * numCColumns); i++) {
+        printf("%f\n", hostC[i]);
+    }
 
     //@@ Free the GPU memory here
 

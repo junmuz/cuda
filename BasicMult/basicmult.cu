@@ -29,8 +29,8 @@ int main(int argc, char ** argv) {
     float * deviceB;
     float * deviceC;
     int numARows = 4; // number of rows in the matrix A (Set this Value)
-    int numAColumns = 3; // number of columns in the matrix A (Set this Value)
-    int numBRows = 3; // number of rows in the matrix B (Set this Value)
+    int numAColumns = 4; // number of columns in the matrix A (Set this Value)
+    int numBRows = 4; // number of rows in the matrix B (Set this Value)
     int numBColumns = 4; // number of columns in the matrix B (Set this Value)
     int numCRows; // number of rows in the matrix C
     int numCColumns; // number of columns in the matrix C
